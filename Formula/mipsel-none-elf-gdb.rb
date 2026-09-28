@@ -1,9 +1,9 @@
 class MipselNoneElfGdb < Formula
   desc "GNU debugger for mipsel-none-elf cross development"
   homepage "https://www.gnu.org/software/gdb/"
-  url "https://ftpmirror.gnu.org/gnu/gdb/gdb-18.1.tar.xz"
-  mirror "https://mirrors.kernel.org/gnu/gdb/gdb-18.1.tar.xz"
-  sha256 "cd9fc3fe2b47743840e42c1592d3d87f8302eb18639c0b8b4ba0898002e2348f"
+  url "https://ftpmirror.gnu.org/gnu/gdb/gdb-17.2.tar.xz"
+  mirror "https://mirrors.kernel.org/gnu/gdb/gdb-17.2.tar.xz"
+  sha256 "1c036c0d72e4b3d1fb5c94c88632add6f9d76f4d7c4d2ea793c12a9f19a3228c"
   license "GPL-3.0-or-later"
 
   depends_on "pkgconf" => :build
@@ -18,7 +18,10 @@ class MipselNoneElfGdb < Formula
   depends_on "zstd"
 
   uses_from_macos "expat"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     target = "mipsel-none-elf"
