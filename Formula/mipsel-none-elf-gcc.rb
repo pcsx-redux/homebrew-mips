@@ -11,6 +11,7 @@ class MipselNoneElfGcc < Formula
   depends_on "libmpc"
   depends_on "mipsel-none-elf-binutils"
   depends_on "mpfr"
+  depends_on "zstd"
 
   def install
     ENV.prepend_path "PATH", formula_opt_libexec("gnu-sed")/"gnubin"
