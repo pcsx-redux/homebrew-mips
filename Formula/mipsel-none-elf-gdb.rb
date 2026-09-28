@@ -1,32 +1,62 @@
 class MipselNoneElfGdb < Formula
-  desc "GDB: The GNU Project Debugger compiled for Mips"
-  homepage "https://sourceware.org/gdb/"
-  url "https://ftpmirror.gnu.org/gnu/gdb/gdb-16.3.tar.xz"
-  mirror "https://mirrors.kernel.org/gnu/gdb/gdb-16.3.tar.xz"
-  sha256 "bcfcd095528a987917acf9fff3f1672181694926cc18d609c99d0042c00224c5"
+  desc "GNU debugger for mipsel-none-elf cross development"
+  homepage "https://www.gnu.org/software/gdb/"
+  url "https://ftpmirror.gnu.org/gnu/gdb/gdb-18.1.tar.xz"
+  mirror "https://mirrors.kernel.org/gnu/gdb/gdb-18.1.tar.xz"
+  sha256 "cd9fc3fe2b47743840e42c1592d3d87f8302eb18639c0b8b4ba0898002e2348f"
+  license "GPL-3.0-or-later"
 
-  # inspired by https://github.com/orgs/Homebrew/discussions/1114#discussioncomment-8863715
-
+  depends_on "pkgconf" => :build
   depends_on "texinfo" => :build
+  depends_on "mipsel-none-elf-gcc" => :test
   depends_on "gmp"
   depends_on "mpfr"
-  depends_on "python@3.10"
+  depends_on "ncurses"
+  depends_on "python@3.14"
+  depends_on "readline"
+  depends_on "xz"
+  depends_on "zstd"
+
+  uses_from_macos "expat"
+  uses_from_macos "zlib"
 
   def install
-    mkdir "mipsel-none-elf-gdb-build" do
-      system "../configure", "--target=mipsel-none-elf",
-                             "--prefix=#{prefix}",
-                             "--enable-tui=yes",
-                             "--without-isl",
-                             "--disable-werror"
+    target = "mipsel-none-elf"
+    python3 = Formula["python@3.14"].opt_bin/"python3.14"
+    args = %W[
+      --target=#{target}
+      --datarootdir=#{share}/#{target}
+      --includedir=#{include}/#{target}
+      --infodir=#{info}/#{target}
+      --mandir=#{man}
+      --disable-binutils
+      --disable-nls
+      --disable-werror
+      --enable-tui
+      --with-curses
+      --with-expat
+      --with-lzma
+      --with-python=#{python3}
+      --with-system-readline
+      --with-system-zlib
+      --with-zstd
+      --without-isl
+    ]
+
+    mkdir "build" do
+      system "../configure", *args, *std_configure_args
+      ENV.deparallelize
       system "make"
-      system "make", "install"
+      # bfd and opcodes are provided by mipsel-none-elf-binutils
+      system "make", "install-gdb"
     end
   end
 
-  # not sure what to test...
-  # test do
-  #   assert_match "f()", shell_output("#{bin}/mipsel-none-elf-c++filt _Z1fv")
-  # end
+  test do
+    (testpath/"test.c").write "void _start(void) {}"
+    system Formula["mipsel-none-elf-gcc"].opt_bin/"mipsel-none-elf-gcc", "-g", "-nostdlib", "test.c"
 
+    output = shell_output("#{bin}/mipsel-none-elf-gdb -batch -ex 'info address _start' a.out")
+    assert_match "Symbol \"_start\" is a function at address 0x", output
+  end
 end
