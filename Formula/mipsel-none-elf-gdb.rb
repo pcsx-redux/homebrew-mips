@@ -22,7 +22,7 @@ class MipselNoneElfGdb < Formula
 
   def install
     target = "mipsel-none-elf"
-    python3 = Formula["python@3.14"].opt_bin/"python3.14"
+    python3 = formula_opt_bin("python@3.14")/"python3.14"
     args = %W[
       --target=#{target}
       --datarootdir=#{share}/#{target}
@@ -54,7 +54,7 @@ class MipselNoneElfGdb < Formula
 
   test do
     (testpath/"test.c").write "void _start(void) {}"
-    system Formula["mipsel-none-elf-gcc"].opt_bin/"mipsel-none-elf-gcc", "-g", "-nostdlib", "test.c"
+    system formula_opt_bin("mipsel-none-elf-gcc")/"mipsel-none-elf-gcc", "-g", "-nostdlib", "test.c"
 
     output = shell_output("#{bin}/mipsel-none-elf-gdb -batch -ex 'info address _start' a.out")
     assert_match "Symbol \"_start\" is a function at address 0x", output
